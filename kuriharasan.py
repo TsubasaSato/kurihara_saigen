@@ -25,7 +25,7 @@ from ryu.lib.packet import ethernet
 from ryu.lib.packet import ether_types
 
 
-class SimpleSwitch15(app_manager.RyuApp):
+class Kurihara15(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_5.OFP_VERSION]
 
     def __init__(self, *args, **kwargs):
@@ -46,9 +46,14 @@ class SimpleSwitch15(app_manager.RyuApp):
         # truncated packet data. In that case, we cannot output packets
         # correctly.  The bug has been fixed in OVS v2.1.0.
         match = parser.OFPMatch()
-        actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
+        actions_0 = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
                                           ofproto.OFPCML_NO_BUFFER)]
-        self.add_flow(datapath, 0, match, actions)
+        match_tcp = parser.OFPMatch(eth_type=0x0800, 
+                                     ip_proto=6,
+                                     tcp_flags=0x000)
+        actions_1 = [parser.OFPInstructionGotoTable(1)]
+        self.add_flow(datapath, 0, match, actions_0)
+        self.add_flow(datapath, 1, match_tcp, actions_1)
 
     def add_flow(self, datapath, priority, match, actions):
         ofproto = datapath.ofproto
