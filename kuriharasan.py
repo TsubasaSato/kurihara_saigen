@@ -41,16 +41,31 @@ class Kurihara15(app_manager.RyuApp):
         match = parser.OFPMatch()
         
         #Send packet to CONTROLLER
-        actions_0 = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
+        actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
                                           ofproto.OFPCML_NO_BUFFER)]
-        self.add_flow(datapath, 0, match, actions_0)
+        #TableID:0
+        self.add_flow(datapath, 0, match, actions)
         
-        match_tcp = parser.OFPMatch(eth_type=0x0800, 
+        match_t1 = parser.OFPMatch(eth_type=0x0800, 
                                      ip_proto=6,
                                      tcp_flags=0x000)
-        #Go to Table1 without sending packet to CONTOROLLER
         inst = [parser.OFPInstructionGotoTable(1)]
-        datapath.send_msg(self.create_flow_mod(datapath, 1,0, match_tcp, inst))
+        datapath.send_msg(self.create_flow_mod(datapath, 1,0, match_t1, inst))
+        #TableID:1
+        actions1 =[parser.NXActionResubmit(in_port=0xfff8,table_id=10)]
+        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
+                                             actions1),
+                parser.OFPInstructionGotoTable(2)]
+        datapath.send_msg(self.create_flow_mod(datapath, 1,1, match, inst)) 
+        #TableID:2
+        datapath.send_msg(self.create_flow_mod(datapath, 1,2, 
+                                               parser.OFPMatch(reg0=0), 
+                                               [parser.OFPInstructionGotoTable(3)])) 
+        datapath.send_msg(self.create_flow_mod(datapath, 0,2, 
+                                               parser.OFPMatch(reg0=1), 
+                                               [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
+                                             actions)])) 
+        #TableID:3
         
     # Create OFP flow mod message.
     def create_flow_mod(self, datapath, priority,
