@@ -50,7 +50,7 @@ class Kurihara15(app_manager.RyuApp):
         actions_1 = [parser.OFPInstructionGotoTable(1)]
         self.add_flow(datapath, 0,0, match, actions_0)
         self.add_flow(datapath, 1,0, match_tcp, actions_1)
-
+    # 指定されたinstが入っていいればそのinstをFlowModに指定する。指定されたinstが無ければただactionを実行するinstを実行させるようにする
     def add_flow(self, datapath, priority, table_id, match, actions):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
