@@ -66,6 +66,7 @@ class Kurihara15(app_manager.RyuApp):
                                                [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
                                              actions)])) 
         #TableID:3
+        match_t1 = parser.OFPMatch(tcp_flags='syn')
         
     # Create OFP flow mod message.
     def create_flow_mod(self, datapath, priority,
