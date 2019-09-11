@@ -47,16 +47,15 @@ class Kurihara15(app_manager.RyuApp):
                                      ip_proto=6,
                                      tcp_flags=0x000)
         #Go to Table1 without sending packet to CONTOROLLER
-        actions_1 = [parser.OFPInstructionGotoTable(1)]
+        inst = [parser.OFPInstructionGotoTable(1)]
         self.add_flow(datapath, 0,0, match, actions_0)
-        self.add_flow(datapath, 1,0, match_tcp, actions_1)
-    # 指定されたinstが入っていいればそのinstをFlowModに指定する。指定されたinstが無ければただactionを実行するinstを実行させるようにする
-    def add_flow(self, datapath, priority, table_id, match, actions):
+        self.add_flow(datapath, 1,0, match_tcp, "Noaction",inst)
+        
+    # If the specified inst is included, specify same inst in FlowMod
+    def add_flow(self, datapath, priority, table_id, match, actions,
+                 inst=parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
-
-        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
-                                             actions)]
 
         mod = parser.OFPFlowMod(datapath=datapath, priority=priority,table_id=table_id,
                                 match=match, instructions=inst)
