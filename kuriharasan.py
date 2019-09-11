@@ -38,13 +38,6 @@ class Kurihara15(app_manager.RyuApp):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
-        # install table-miss flow entry
-        #
-        # We specify NO BUFFER to max_len of the output action due to
-        # OVS bug. At this moment, if we specify a lesser number, e.g.,
-        # 128, OVS will send Packet-In with invalid buffer_id and
-        # truncated packet data. In that case, we cannot output packets
-        # correctly.  The bug has been fixed in OVS v2.1.0.
         match = parser.OFPMatch()
         actions_0 = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
                                           ofproto.OFPCML_NO_BUFFER)]
@@ -55,14 +48,14 @@ class Kurihara15(app_manager.RyuApp):
         self.add_flow(datapath, 0, match, actions_0)
         self.add_flow(datapath, 1, match_tcp, actions_1)
 
-    def add_flow(self, datapath, priority, match, actions):
+    def add_flow(self, datapath, priority, table_id, match, actions):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
                                              actions)]
 
-        mod = parser.OFPFlowMod(datapath=datapath, priority=priority,
+        mod = parser.OFPFlowMod(datapath=datapath, priority=priority,table_id=table_id,
                                 match=match, instructions=inst)
         datapath.send_msg(mod)
 
