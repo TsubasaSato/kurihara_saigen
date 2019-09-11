@@ -39,14 +39,17 @@ class Kurihara15(app_manager.RyuApp):
         parser = datapath.ofproto_parser
 
         match = parser.OFPMatch()
+        
+        #Send packet to CONTROLLER
         actions_0 = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
                                           ofproto.OFPCML_NO_BUFFER)]
         match_tcp = parser.OFPMatch(eth_type=0x0800, 
                                      ip_proto=6,
                                      tcp_flags=0x000)
+        #Go to Table1 without sending packet to CONTOROLLER
         actions_1 = [parser.OFPInstructionGotoTable(1)]
-        self.add_flow(datapath, 0, match, actions_0)
-        self.add_flow(datapath, 1, match_tcp, actions_1)
+        self.add_flow(datapath, 0,0, match, actions_0)
+        self.add_flow(datapath, 1,0, match_tcp, actions_1)
 
     def add_flow(self, datapath, priority, table_id, match, actions):
         ofproto = datapath.ofproto
