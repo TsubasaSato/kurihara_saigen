@@ -67,6 +67,22 @@ class Kurihara15(app_manager.RyuApp):
                                              actions)])) 
         #TableID:3
         match_t1 = parser.OFPMatch(tcp_flags='syn')
+        # reply syn/ack　部分がまだできていない
+        
+        actions1 =[parser.NXActionResubmit(in_port=0xfff8,table_id=11)]
+        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
+                                             actions1),
+                parser.OFPInstructionGotoTable(4)]
+        datapath.send_msg(self.create_flow_mod(datapath, 0,3, 
+                                               parser.OFPMatch(tcp_flags='rst'),inst)) 
+        #TableID:4
+        datapath.send_msg(self.create_flow_mod(datapath, 1,4, 
+                                               parser.OFPMatch(reg0=1), 
+                                               [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
+                                             actions)])) 
+        
+        
+        
         
     # Create OFP flow mod message.
     def create_flow_mod(self, datapath, priority,
@@ -80,6 +96,39 @@ class Kurihara15(app_manager.RyuApp):
                                                       OFPG_ANY, 0,
                                                       match, instructions)
         return flow_mod
+    # OVS adds new flow in table
+    def ATlearn_add_flow(self, datapath, priority,
+                        table_id, match, instructions):
+        ofproto = datapath.ofproto
+        actions += [
+    parser.NXActionLearn(able_id=10,
+         specs=[parser.NXFlowSpecMatch(src=0x800,
+                                       dst=('eth_type_nxm', 0),
+                                       n_bits=16),
+                parser.NXFlowSpecMatch(src=('reg1', 1),
+                                       dst=('reg2', 3),
+                                       n_bits=5),
+                parser.NXFlowSpecMatch(src=('reg3', 1),
+                                       dst=('reg3', 1),
+                                       n_bits=5),
+                parser.NXFlowSpecLoad(src=0,
+                                      dst=('reg4', 3),
+                                      n_bits=5),
+                parser.NXFlowSpecLoad(src=('reg5', 1),
+                                      dst=('reg6', 3),
+                                      n_bits=5),
+                parser.NXFlowSpecOutput(src=('reg7', 1),
+                                        dst="",
+                                        n_bits=5)],
+         idle_timeout=180,
+         hard_timeout=300,
+         priority=1,
+         cookie=0x64,
+         flags=ofproto.OFPFF_SEND_FLOW_REM,
+         fin_idle_timeout=180,
+         fin_hard_timeout=300)]
+        
+        return action
     
     def add_flow(self, datapath, priority, match, actions):
         ofproto = datapath.ofproto
