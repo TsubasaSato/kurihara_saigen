@@ -100,7 +100,7 @@ class Kurihara15(app_manager.RyuApp):
     def ATlearn_add_flow(self, datapath, priority,
                         table_id, match, instructions):
         ofproto = datapath.ofproto
-        actions += [
+        actions = [
     parser.NXActionLearn(able_id=10,
          specs=[parser.NXFlowSpecMatch(src=0x800,
                                        dst=('eth_type_nxm', 0),
@@ -128,7 +128,7 @@ class Kurihara15(app_manager.RyuApp):
          fin_idle_timeout=180,
          fin_hard_timeout=300)]
         
-        return action
+        return actions
     
     def add_flow(self, datapath, priority, match, actions):
         ofproto = datapath.ofproto
