@@ -66,6 +66,15 @@ class Kurihara15(app_manager.RyuApp):
                                                [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
                                              actions)])) 
         #TableID:3
+        specs=[
+            #Match is nothing
+            parser.NXFlowSpecMatch(),
+            #set_field 1->reg0
+            parser.NXFlowSpecLoad(src=1, dst=('reg0', 1), n_bits=5)
+        ]
+        flow10 = ATlearn_add_flow(datapath,1,10,specs)
+        flow11 = ATlearn_add_flow(datapath,1,11,specs)
+        
         match_t1 = parser.OFPMatch(tcp_flags='syn')
         # reply syn/ack　部分がまだできていない
         
@@ -79,9 +88,18 @@ class Kurihara15(app_manager.RyuApp):
         datapath.send_msg(self.create_flow_mod(datapath, 1,4, 
                                                parser.OFPMatch(reg0=1), 
                                                [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
-                                             actions)])) 
-        
-        
+                                             flow10)])) 
+        #TableID:10
+        actions1 = [OFPActionSetField(reg0=0)]
+        datapath.send_msg(self.create_flow_mod(datapath, 0,10, 
+                                               parser.OFPMatch(), 
+                                               [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
+                                             actions1)])) 
+        #TableID:11
+        datapath.send_msg(self.create_flow_mod(datapath, 0,11, 
+                                               parser.OFPMatch(), 
+                                               [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
+                                             actions1)])) 
         
         
     # Create OFP flow mod message.
@@ -96,39 +114,21 @@ class Kurihara15(app_manager.RyuApp):
                                                       OFPG_ANY, 0,
                                                       match, instructions)
         return flow_mod
-    # OVS adds new flow in table
+    # OVS adds new flow in table, "specs" must be array.
     def ATlearn_add_flow(self, datapath, priority,
-                        table_id, match, instructions):
+                        table_id, specs):
         ofproto = datapath.ofproto
-        actions = [
-    parser.NXActionLearn(able_id=10,
-         specs=[parser.NXFlowSpecMatch(src=0x800,
-                                       dst=('eth_type_nxm', 0),
-                                       n_bits=16),
-                parser.NXFlowSpecMatch(src=('reg1', 1),
-                                       dst=('reg2', 3),
-                                       n_bits=5),
-                parser.NXFlowSpecMatch(src=('reg3', 1),
-                                       dst=('reg3', 1),
-                                       n_bits=5),
-                parser.NXFlowSpecLoad(src=0,
-                                      dst=('reg4', 3),
-                                      n_bits=5),
-                parser.NXFlowSpecLoad(src=('reg5', 1),
-                                      dst=('reg6', 3),
-                                      n_bits=5),
-                parser.NXFlowSpecOutput(src=('reg7', 1),
-                                        dst="",
-                                        n_bits=5)],
+        flows = [parser.NXActionLearn(table_id=table_id,
+         specs=specs,
          idle_timeout=180,
          hard_timeout=300,
-         priority=1,
+         priority=priority,
          cookie=0x64,
          flags=ofproto.OFPFF_SEND_FLOW_REM,
          fin_idle_timeout=180,
          fin_hard_timeout=300)]
         
-        return actions
+        return flows
     
     def add_flow(self, datapath, priority, match, actions):
         ofproto = datapath.ofproto
