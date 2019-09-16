@@ -126,7 +126,7 @@ class Kurihara15(app_manager.RyuApp):
                                                       priority,
                                                       ofproto.OFPCML_NO_BUFFER,
                                                       ofproto.OFPP_ANY,
-                                                      OFPG_ANY, 0,
+                                                      ofproto.OFPG_ANY, 0,
                                                       match, instructions)
         return flow_mod
     # OVS adds new flow in table, "specs" must be array.
