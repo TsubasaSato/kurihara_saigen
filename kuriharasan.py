@@ -32,6 +32,7 @@ class Kurihara15(app_manager.RyuApp):
     TCP_RST = 0x004
     TCP_PSH = 0x008
     TCP_ACK = 0x010
+    TCP_SYN_ACK = 0x012
     
     def __init__(self, *args, **kwargs):
         super(Kurihara15, self).__init__(*args, **kwargs)
@@ -130,7 +131,7 @@ class Kurihara15(app_manager.RyuApp):
                    parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('tcp_src'), parser.OFPOxmId('reg1')]),
                    parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('tcp_dst'), parser.OFPOxmId('tcp_src')]),
                    parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('reg1'), parser.OFPOxmId('tcp_dst')]),
-                   parser.OFPActionSetField(tcp_flags=(self.TCP_ACK,self.TCP_SYN))
+                   parser.OFPActionSetField(tcp_flags=self.TCP_SYN_ACK)
                   ]
         actions1 += flow11
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
