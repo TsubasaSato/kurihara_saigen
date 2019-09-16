@@ -51,7 +51,7 @@ class Kurihara15(app_manager.RyuApp):
         inst = [parser.OFPInstructionGotoTable(1)]
         datapath.send_msg(self.create_flow_mod(datapath, 1,0, match_t1, inst))
         #TableID:1
-        actions1 =[parser.NXActionResubmit(in_port=0xfff8,table_id=10)]
+        actions1 =[parser.NXActionResubmitTable(in_port=0xfff8,table_id=10)]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
                                              actions1),
                 parser.OFPInstructionGotoTable(2)]
