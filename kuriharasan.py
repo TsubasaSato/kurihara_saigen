@@ -107,8 +107,8 @@ class Kurihara15(app_manager.RyuApp):
         #TableID:3
         #Match is nothing and set_field 1 -> reg0
         specs=[
-            parser.NXFlowSpecMatch(src=0,dst=0,n_bits=0),
-            parser.NXFlowSpecLoad(src=1, dst=('reg0', 1), n_bits=5)
+            parser.NXFlowSpecMatch(src=0x800, dst=('eth_type_nxm', 0), n_bits=16),
+            parser.NXFlowSpecLoad(src=1, dst=('reg0', 0), n_bits=5)
         ]
         flow10 = self.NXlearn_add_flow(datapath,1,10,specs)
         flow11 = self.NXlearn_add_flow(datapath,1,11,specs)
