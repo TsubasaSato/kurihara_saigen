@@ -124,7 +124,8 @@ class Kurihara15(app_manager.RyuApp):
         # exchange IP,MAC,PORT  reg valiable must have a trailing number??
         actions1 =[parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('ipv4_src'), parser.OFPOxmId('reg1')]),
                    parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('ipv4_dst'), parser.OFPOxmId('ipv4_src')]),
-                   parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('reg1'), parser.OFPOxmId('ipv4_dst')])
+                   parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('reg1'), parser.OFPOxmId('ipv4_dst')]),
+                   parser.OFPActionSetField(tcp_flags=self.TCP_SYN_ACK)
                   ]
         
                   # parser.OFPActionCopyField(n_bits=48,oxm_ids=[parser.OFPOxmId('eth_src'), parser.OFPOxmId('reg1')]),
