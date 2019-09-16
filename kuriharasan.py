@@ -31,6 +31,40 @@ class Kurihara15(app_manager.RyuApp):
     def __init__(self, *args, **kwargs):
         super(Kurihara15, self).__init__(*args, **kwargs)
         self.mac_to_port = {}
+        
+    # Create OFP flow mod message.
+    def create_flow_mod(self, datapath, priority,
+                        table_id, match, instructions):
+        ofproto = datapath.ofproto
+        flow_mod = datapath.ofproto_parser.OFPFlowMod(datapath=datapath, table_id=table_id, priority=priority,
+                                match=match, instructions=instructions)
+        return flow_mod
+    # OVS adds new flow in table, "specs" must be array.
+    def ATlearn_add_flow(self, datapath, priority,
+                        table_id, specs):
+        ofproto = datapath.ofproto
+        flows = [parser.NXActionLearn(table_id=table_id,
+         specs=specs,
+         idle_timeout=180,
+         hard_timeout=300,
+         priority=priority,
+         cookie=0x64,
+         flags=ofproto.OFPFF_SEND_FLOW_REM,
+         fin_idle_timeout=180,
+         fin_hard_timeout=300)]
+        
+        return flows
+    
+    def add_flow(self, datapath, priority, match, actions):
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
+
+        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
+                                             actions)]
+
+        mod = parser.OFPFlowMod(datapath=datapath, priority=priority,
+                                match=match, instructions=inst)
+        datapath.send_msg(mod)
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
@@ -114,40 +148,6 @@ class Kurihara15(app_manager.RyuApp):
                                                [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
                                              actions1)])) 
         
-        
-    # Create OFP flow mod message.
-    def create_flow_mod(self, datapath, priority,
-                        table_id, match, instructions):
-        ofproto = datapath.ofproto
-        flow_mod = datapath.ofproto_parser.OFPFlowMod(datapath=datapath, table_id=table_id, priority=priority,
-                                match=match, instructions=instructions)
-        return flow_mod
-    # OVS adds new flow in table, "specs" must be array.
-    def ATlearn_add_flow(self, datapath, priority,
-                        table_id, specs):
-        ofproto = datapath.ofproto
-        flows = [parser.NXActionLearn(table_id=table_id,
-         specs=specs,
-         idle_timeout=180,
-         hard_timeout=300,
-         priority=priority,
-         cookie=0x64,
-         flags=ofproto.OFPFF_SEND_FLOW_REM,
-         fin_idle_timeout=180,
-         fin_hard_timeout=300)]
-        
-        return flows
-    
-    def add_flow(self, datapath, priority, match, actions):
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
-
-        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
-                                             actions)]
-
-        mod = parser.OFPFlowMod(datapath=datapath, priority=priority,
-                                match=match, instructions=inst)
-        datapath.send_msg(mod)
 
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
