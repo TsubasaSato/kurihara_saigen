@@ -27,7 +27,12 @@ from ryu.lib.packet import ether_types
 
 class Kurihara15(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_5.OFP_VERSION]
-
+    #TCP_flags values
+    TCP_SYN = 0x002
+    TCP_RST = 0x004
+    TCP_PSH = 0x008
+    TCP_ACK = 0x010
+    
     def __init__(self, *args, **kwargs):
         super(Kurihara15, self).__init__(*args, **kwargs)
         self.mac_to_port = {}
@@ -113,7 +118,7 @@ class Kurihara15(app_manager.RyuApp):
                                              actions1),
                 parser.OFPInstructionGotoTable(4)]
         datapath.send_msg(self.create_flow_mod(datapath, 0,3, 
-                                               parser.OFPMatch(tcp_flags=tcp.TCP_RST),inst)) 
+                                               parser.OFPMatch(tcp_flags=self.TCP_RST),inst)) 
         # exchange IP,MAC,PORT  reg valiable must have a trailing number?? the number of "tcp_flags" arg may be wrong??
         actions1 =[parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('ipv4_src'), parser.OFPOxmId('reg')]),
                    parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('ipv4_dst'), parser.OFPOxmId('ipv4_src')]),
@@ -124,13 +129,13 @@ class Kurihara15(app_manager.RyuApp):
                    parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('tcp_src'), parser.OFPOxmId('reg')]),
                    parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('tcp_dst'), parser.OFPOxmId('tcp_src')]),
                    parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('reg'), parser.OFPOxmId('tcp_dst')]),
-                   parser.OFPActionSetField(tcp_flags=(tcp.TCP_ACK,tcp.TCP_SYN)),
+                   parser.OFPActionSetField(tcp_flags=(self.TCP_ACK,self.TCP_SYN)),
                    flow11
                   ]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
                                              actions1)]
         datapath.send_msg(self.create_flow_mod(datapath, 1,3, 
-                                               parser.OFPMatch(tcp_flags=tcp.TCP_SYN),inst))
+                                               parser.OFPMatch(tcp_flags=self.TCP_SYN),inst))
         
         #TableID:4
         datapath.send_msg(self.create_flow_mod(datapath, 1,4, 
