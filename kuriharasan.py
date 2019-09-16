@@ -119,16 +119,16 @@ class Kurihara15(app_manager.RyuApp):
                 parser.OFPInstructionGotoTable(4)]
         datapath.send_msg(self.create_flow_mod(datapath, 0,3, 
                                                parser.OFPMatch(tcp_flags=self.TCP_RST),inst)) 
-        # exchange IP,MAC,PORT  reg valiable must have a trailing number?? the number of "tcp_flags" arg may be wrong??
-        actions1 =[parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('ipv4_src'), parser.OFPOxmId('reg')]),
+        # exchange IP,MAC,PORT  reg valiable must have a trailing number??
+        actions1 =[parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('ipv4_src'), parser.OFPOxmId('reg1')]),
                    parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('ipv4_dst'), parser.OFPOxmId('ipv4_src')]),
-                   parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('reg'), parser.OFPOxmId('ipv4_dst')]),
-                   parser.OFPActionCopyField(n_bits=48,oxm_ids=[parser.OFPOxmId('eth_src'), parser.OFPOxmId('reg')]),
+                   parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('reg1'), parser.OFPOxmId('ipv4_dst')]),
+                   parser.OFPActionCopyField(n_bits=48,oxm_ids=[parser.OFPOxmId('eth_src'), parser.OFPOxmId('reg1')]),
                    parser.OFPActionCopyField(n_bits=48,oxm_ids=[parser.OFPOxmId('eth_dst'), parser.OFPOxmId('eth_src')]),
-                   parser.OFPActionCopyField(n_bits=48,oxm_ids=[parser.OFPOxmId('reg'), parser.OFPOxmId('eth_dst')]),
-                   parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('tcp_src'), parser.OFPOxmId('reg')]),
+                   parser.OFPActionCopyField(n_bits=48,oxm_ids=[parser.OFPOxmId('reg1'), parser.OFPOxmId('eth_dst')]),
+                   parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('tcp_src'), parser.OFPOxmId('reg1')]),
                    parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('tcp_dst'), parser.OFPOxmId('tcp_src')]),
-                   parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('reg'), parser.OFPOxmId('tcp_dst')]),
+                   parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('reg1'), parser.OFPOxmId('tcp_dst')]),
                    parser.OFPActionSetField(tcp_flags=(self.TCP_ACK,self.TCP_SYN)),
                   ]
         actions1 += flow11
