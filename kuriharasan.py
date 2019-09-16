@@ -130,8 +130,8 @@ class Kurihara15(app_manager.RyuApp):
                    parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('tcp_dst'), parser.OFPOxmId('tcp_src')]),
                    parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('reg'), parser.OFPOxmId('tcp_dst')]),
                    parser.OFPActionSetField(tcp_flags=(self.TCP_ACK,self.TCP_SYN)),
-                   flow11
                   ]
+        actions1 += flow11
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
                                              actions1)]
         datapath.send_msg(self.create_flow_mod(datapath, 1,3, 
