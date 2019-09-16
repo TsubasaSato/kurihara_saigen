@@ -120,13 +120,8 @@ class Kurihara15(app_manager.RyuApp):
     def create_flow_mod(self, datapath, priority,
                         table_id, match, instructions):
         ofproto = datapath.ofproto
-        flow_mod = datapath.ofproto_parser.OFPFlowMod(datapath, 0, 0, table_id,
-                                                      ofproto.OFPFC_ADD, 0, 0,
-                                                      priority,
-                                                      ofproto.OFPCML_NO_BUFFER,
-                                                      ofproto.OFPP_ANY,
-                                                      ofproto.OFPG_ANY, 0,
-                                                      match, instructions)
+        flow_mod = datapath.ofproto_parser.OFPFlowMod(datapath=datapath, table_id=table_id, priority=priority,
+                                match=match, instructions=instructions)
         return flow_mod
     # OVS adds new flow in table, "specs" must be array.
     def ATlearn_add_flow(self, datapath, priority,
