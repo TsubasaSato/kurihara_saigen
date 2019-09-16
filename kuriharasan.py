@@ -29,7 +29,7 @@ class Kurihara15(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_5.OFP_VERSION]
 
     def __init__(self, *args, **kwargs):
-        super(SimpleSwitch15, self).__init__(*args, **kwargs)
+        super(Kurihara15, self).__init__(*args, **kwargs)
         self.mac_to_port = {}
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
