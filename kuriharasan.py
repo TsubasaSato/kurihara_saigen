@@ -40,7 +40,7 @@ class Kurihara15(app_manager.RyuApp):
                                 match=match, instructions=instructions)
         return flow_mod
     # OVS adds new flow in table, "specs" must be array.
-    def atlearn_add_flow(self, datapath, priority,
+    def NXlearn_add_flow(self, datapath, priority,
                         table_id, specs):
         ofproto = datapath.ofproto
         flows = [parser.NXActionLearn(table_id=table_id,
@@ -104,8 +104,8 @@ class Kurihara15(app_manager.RyuApp):
             parser.NXFlowSpecMatch(src=0,dst=0,n_bits=0),
             parser.NXFlowSpecLoad(src=1, dst=('reg0', 1), n_bits=5)
         ]
-        flow10 = atlearn_add_flow(datapath,1,10,specs)
-        flow11 = atlearn_add_flow(datapath,1,11,specs)
+        flow10 = self.NXlearn_add_flow(datapath,1,10,specs)
+        flow11 = self.NXlearn_add_flow(datapath,1,11,specs)
        
         actions1 =[parser.NXActionResubmit(in_port=0xfff8,table_id=11)]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
