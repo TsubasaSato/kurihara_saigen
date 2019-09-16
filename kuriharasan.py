@@ -56,7 +56,7 @@ class Kurihara15(app_manager.RyuApp):
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
                                              actions1),
                 parser.OFPInstructionGotoTable(2)]
-        datapath.send_msg(self.create_flow_mod(datapath, 1,1, match, inst)) 
+        datapath.send_msg(self.create_flow_mod(datapath, 0,1, match, inst)) 
         #TableID:2
         datapath.send_msg(self.create_flow_mod(datapath, 1,2, 
                                                parser.OFPMatch(reg0=0), 
