@@ -108,7 +108,7 @@ class Kurihara15(app_manager.RyuApp):
         flow10 = self.NXlearn_add_flow(datapath,1,10,specs)
         flow11 = self.NXlearn_add_flow(datapath,1,11,specs)
        
-        actions1 =[parser.NXActionResubmit(in_port=0xfff8,table_id=11)]
+        actions1 =[parser.NXActionResubmitTable(in_port=0xfff8,table_id=11)]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
                                              actions1),
                 parser.OFPInstructionGotoTable(4)]
