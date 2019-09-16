@@ -118,7 +118,8 @@ class Kurihara15(app_manager.RyuApp):
                                              actions1),
                 parser.OFPInstructionGotoTable(4)]
         datapath.send_msg(self.create_flow_mod(datapath, 0,3, 
-                                               parser.OFPMatch(tcp_flags=self.TCP_RST),inst)) 
+                                               parser.OFPMatch(eth_type=0x0800, 
+                                     ip_proto=6,tcp_flags=self.TCP_RST),inst)) 
         # exchange IP,MAC,PORT  reg valiable must have a trailing number??
         actions1 =[parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('ipv4_src'), parser.OFPOxmId('reg1')]),
                    parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('ipv4_dst'), parser.OFPOxmId('ipv4_src')]),
@@ -135,7 +136,8 @@ class Kurihara15(app_manager.RyuApp):
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
                                              actions1)]
         datapath.send_msg(self.create_flow_mod(datapath, 1,3, 
-                                               parser.OFPMatch(tcp_flags=self.TCP_SYN),inst))
+                                               parser.OFPMatch(eth_type=0x0800, 
+                                     ip_proto=6,tcp_flags=self.TCP_SYN),inst))
         
         #TableID:4
         datapath.send_msg(self.create_flow_mod(datapath, 1,4, 
