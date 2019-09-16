@@ -65,10 +65,9 @@ class Kurihara15(app_manager.RyuApp):
                                                [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
                                              actions)])) 
         #TableID:3
+        #Match is nothing and set_field 1 -> reg0
         specs=[
-            #Match is nothing
-            parser.NXFlowSpecMatch(),
-            #set_field 1->reg0
+            parser.NXFlowSpecMatch(src=0,dst=0,n_bits=0),
             parser.NXFlowSpecLoad(src=1, dst=('reg0', 1), n_bits=5)
         ]
         flow10 = ATlearn_add_flow(datapath,1,10,specs)
