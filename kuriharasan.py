@@ -43,6 +43,7 @@ class Kurihara15(app_manager.RyuApp):
     def NXlearn_add_flow(self, datapath, priority,
                         table_id, specs):
         ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
         flows = [parser.NXActionLearn(table_id=table_id,
          specs=specs,
          idle_timeout=180,
