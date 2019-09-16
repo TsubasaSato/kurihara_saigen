@@ -74,16 +74,14 @@ class Kurihara15(app_manager.RyuApp):
         ]
         flow10 = ATlearn_add_flow(datapath,1,10,specs)
         flow11 = ATlearn_add_flow(datapath,1,11,specs)
-        #不正な確認応答番号のreplyが課題である
-        match_t1 = parser.OFPMatch(tcp_flags='syn')
        
         actions1 =[parser.NXActionResubmit(in_port=0xfff8,table_id=11)]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
                                              actions1),
                 parser.OFPInstructionGotoTable(4)]
         datapath.send_msg(self.create_flow_mod(datapath, 0,3, 
-                                               parser.OFPMatch(tcp_flags='rst'),inst)) 
-        # exchange IP,MAC,PORT  reg変数は後ろに数字をつけて使用しなければならない？
+                                               parser.OFPMatch(tcp_flags=packet.tcp.TCP_RST),inst)) 
+        # exchange IP,MAC,PORT  reg valiable must have a trailing number?? the number of "tcp_flags" arg may be wrong??
         actions1 =[parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('ipv4_src'), parser.OFPOxmId('reg')]),
                    parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('ipv4_dst'), parser.OFPOxmId('ipv4_src')]),
                    parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('reg'), parser.OFPOxmId('ipv4_dst')]),
@@ -92,8 +90,14 @@ class Kurihara15(app_manager.RyuApp):
                    parser.OFPActionCopyField(n_bits=48,oxm_ids=[parser.OFPOxmId('reg'), parser.OFPOxmId('eth_dst')]),
                    parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('tcp_src'), parser.OFPOxmId('reg')]),
                    parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('tcp_dst'), parser.OFPOxmId('tcp_src')]),
-                   parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('reg'), parser.OFPOxmId('tcp_dst')])
+                   parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('reg'), parser.OFPOxmId('tcp_dst')]),
+                   parser.OFPActionSetField(tcp_flags=(packet.tcp.TCP_ACK,packet.tcp.TCP_SYN)),
+                   flow11
                   ]
+        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
+                                             actions1)]
+        datapath.send_msg(self.create_flow_mod(datapath, 1,3, 
+                                               parser.OFPMatch(tcp_flags=packet.tcp.TCP_SYN),inst))
         
         #TableID:4
         datapath.send_msg(self.create_flow_mod(datapath, 1,4, 
@@ -101,7 +105,7 @@ class Kurihara15(app_manager.RyuApp):
                                                [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
                                              flow10)])) 
         #TableID:10
-        actions1 = [OFPActionSetField(reg0=0)]
+        actions1 = [parser.OFPActionSetField(reg0=0)]
         datapath.send_msg(self.create_flow_mod(datapath, 0,10, 
                                                parser.OFPMatch(), 
                                                [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
