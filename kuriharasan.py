@@ -125,7 +125,7 @@ class Kurihara15(app_manager.RyuApp):
         actions1 =[parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('ipv4_src'), parser.OFPOxmId('reg1')]),
                    parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('ipv4_dst'), parser.OFPOxmId('ipv4_src')]),
                    parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('reg1'), parser.OFPOxmId('ipv4_dst')]),
-                   parser.OFPActionCopyField(n_bits=128,oxm_ids=[parser.OFPOxmId('eth_src'), parser.OFPOxmId('xxreg3'')]),
+                   parser.OFPActionCopyField(n_bits=128,oxm_ids=[parser.OFPOxmId('eth_src'), parser.OFPOxmId('xxreg3')]),
                    parser.OFPActionCopyField(n_bits=128,oxm_ids=[parser.OFPOxmId('eth_dst'), parser.OFPOxmId('eth_src')]),
                    parser.OFPActionCopyField(n_bits=128,oxm_ids=[parser.OFPOxmId('xxreg3'), parser.OFPOxmId('eth_dst')]),
                    parser.OFPActionCopyField(n_bits=32,oxm_ids=[parser.OFPOxmId('tcp_src'), parser.OFPOxmId('reg2')]),
