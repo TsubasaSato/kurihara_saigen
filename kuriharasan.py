@@ -131,7 +131,7 @@ class Kurihara15(app_manager.RyuApp):
                    parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('tcp_src'), parser.OFPOxmId('reg2')]),
                    parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('tcp_dst'), parser.OFPOxmId('tcp_src')]),
                    parser.OFPActionCopyField(n_bits=16,oxm_ids=[parser.OFPOxmId('reg2'), parser.OFPOxmId('tcp_dst')])
-                   #parser.OFPActionSetField(tcp_flags=self.TCP_SYN)
+                   parser.OFPActionSetField(tcp_flags=self.TCP_SYN)
                   ]
                   
         actions1 += flow11
