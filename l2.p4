@@ -110,6 +110,7 @@ action dmac_multicast_hit(mc_index) {
 }
 
 action dmac_miss() {
+// 出力インターフェイスインデックス に Floodを指定している
     modify_field(ingress_metadata.egress_ifindex, IFINDEX_FLOOD);
 #ifdef FABRIC_ENABLE
     modify_field(fabric_metadata.dst_device, FABRIC_DEVICE_MULTICAST);
@@ -141,6 +142,7 @@ table dmac {
 #ifdef OPENFLOW_ENABLE
         openflow_apply;
         openflow_miss;
+        // OPENFLOW_ENABLEが有効であったらendifまで有効である
 #endif /* OPENFLOW_ENABLE */
         nop;
         dmac_hit;
