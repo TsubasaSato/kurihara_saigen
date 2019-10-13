@@ -161,12 +161,14 @@ class Kurihara15(app_manager.RyuApp):
 
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
+        # msgはpacket_inのメッセージ
         msg = ev.msg
         datapath = msg.datapath
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
         in_port = msg.match['in_port']
-
+        
+        # analyse the received packets using the packet library.
         pkt = packet.Packet(msg.data)
         eth = pkt.get_protocols(ethernet.ethernet)[0]
 
@@ -176,6 +178,7 @@ class Kurihara15(app_manager.RyuApp):
         dst = eth.dst
         src = eth.src
 
+        # スイッチを特定するためのデータパスIDを取得
         dpid = datapath.id
         self.mac_to_port.setdefault(dpid, {})
 
@@ -183,10 +186,13 @@ class Kurihara15(app_manager.RyuApp):
 
         # learn a mac address to avoid FLOOD next time.
         self.mac_to_port[dpid][src] = in_port
-
+        
+        # if the destination mac address is already learned,
+        # decide which port to output the packet, otherwise FLOOD.
         if dst in self.mac_to_port[dpid]:
             out_port = self.mac_to_port[dpid][dst]
         else:
+            # フラッディングパケットは送信元ポート以外に送信される
             out_port = ofproto.OFPP_FLOOD
 
         actions = [parser.OFPActionOutput(out_port)]
@@ -194,6 +200,7 @@ class Kurihara15(app_manager.RyuApp):
         # install a flow to avoid packet_in next time
         if out_port != ofproto.OFPP_FLOOD:
             match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
+            # Flow modが実施されている
             self.add_flow(datapath, 1, match, actions)
 
         data = None
@@ -201,7 +208,7 @@ class Kurihara15(app_manager.RyuApp):
             data = msg.data
 
         match = parser.OFPMatch(in_port=in_port)
-
+        # これはFlow modではなくパケットの値をFloodするようにPacket_outしているだけ
         out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id,
                                   match=match, actions=actions, data=data)
         datapath.send_msg(out)
