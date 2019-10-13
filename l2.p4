@@ -73,6 +73,7 @@ control process_spanning_tree {
 /* Source MAC lookup                                                         */
 /*****************************************************************************/
 action smac_miss() {
+    // srcMACが見つからなかったことをメタデータに記載
     modify_field(l2_metadata.l2_src_miss, TRUE);
 }
 
