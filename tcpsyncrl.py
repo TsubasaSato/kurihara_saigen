@@ -95,54 +95,59 @@ class TCPSYN13(app_manager.RyuApp):
 
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
-        # msgはpacket_inのメッセージ
         msg = ev.msg
         datapath = msg.datapath
+        port = msg.match['in_port']
+        pkt = packet.Packet(data=msg.data)
+        self.logger.info("packet-in %s" % (pkt,))
+        pkt_ethernet = pkt.get_protocol(ethernet.ethernet)
+        if not pkt_ethernet:
+            return
+        pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
+        pkt_tcp = pkt.get_protocol(tcp.tcp)
+        if pkt_tcp:
+            self._handle_icmp(datapath, port, pkt_ethernet, pkt_ipv4, pkt_tcp)
+            return
+
+    def _handle_tcp(self, datapath, port, pkt_ethernet, pkt_ipv4, pkt_tcp):
+        pkt_in = packet.Packet()
+
+        # Mac in received pkt
+        pkt_in.add_protocol(
+            ethernet.ethernet(
+                dst=pkt_ethernet.src,
+                src=pkt_ethernet.dst,
+            ),
+        ) 
+        # IP in received pkt
+        pkt_in.add_protocol(
+            ipv4.ipv4(
+                dst=pkt_ipv4.src,
+                src=pkt_ipv4.dst,
+                proto=in_proto.IPPROTO_TCP,
+            ),
+        )
+        # Port , Seq , Ack and Flags in received pkt
+        pkt_in.add_protocol(
+            tcp.tcp(
+                src_port=pkt_tcp.dst,
+                dst_port=pkt_tcp.src,
+            ),
+         )
+        payload_data = b'arbitrary'  # as a raw binary
+        pkt_in.add_protocol(payload_data)
+        self.send_packet(datapath,port,pkt_in)
+        
+    def _send_packet(self, datapath, port, pkt):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
-        in_port = msg.match['in_port']
-        
-        # analyse the received packets using the packet library.
-        pkt = packet.Packet(msg.data)
-        eth = pkt.get_protocols(ethernet.ethernet)[0]
-
-        if eth.ethertype == ether_types.ETH_TYPE_LLDP:
-            # ignore lldp packet
-            return
-        dst = eth.dst
-        src = eth.src
-
-        # スイッチを特定するためのデータパスIDを取得
-        dpid = datapath.id
-        self.mac_to_port.setdefault(dpid, {})
-
-        self.logger.info("packet in %s %s %s %s", dpid, src, dst, in_port)
-
-        # learn a mac address to avoid FLOOD next time.
-        self.mac_to_port[dpid][src] = in_port
-        
-        # if the destination mac address is already learned,
-        # decide which port to output the packet, otherwise FLOOD.
-        if dst in self.mac_to_port[dpid]:
-            out_port = self.mac_to_port[dpid][dst]
-        else:
-            # フラッディングパケットは送信元ポート以外に送信される
-            out_port = ofproto.OFPP_FLOOD
-
-        actions = [parser.OFPActionOutput(out_port)]
-
-        # install a flow to avoid packet_in next time
-        if out_port != ofproto.OFPP_FLOOD:
-            match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
-            # Flow modが実施されている
-            self.add_flow(datapath, 1, match, actions)
-
-        data = None
-        if msg.buffer_id == ofproto.OFP_NO_BUFFER:
-            data = msg.data
-
-        match = parser.OFPMatch(in_port=in_port)
-        # これはFlow modではなくパケットの値をFloodするようにPacket_outしているだけ
-        out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id,
-                                  match=match, actions=actions, data=data)
+        pkt.serialize()
+        self.logger.info("packet-out %s" % (pkt,))
+        data = pkt.data
+        actions = [parser.OFPActionOutput(port=port)]
+        out = parser.OFPPacketOut(datapath=datapath,
+                                  buffer_id=ofproto.OFP_NO_BUFFER,
+                                  in_port=ofproto.OFPP_CONTROLLER,
+                                  actions=actions,
+                                  data=data)
         datapath.send_msg(out)
